@@ -17,12 +17,16 @@ export interface Project {
   tareas: Task[];
 }
 
+export type ProjectId = Project['id'];
+
 export interface Employee {
   id: string;
   nombre: string;
   correo: string;
   proyectosAsignados: string[];
 }
+
+export type EmployeeId = Employee['id'];
 
 export interface DateRange {
   startDate: string;

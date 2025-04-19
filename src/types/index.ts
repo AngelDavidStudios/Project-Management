@@ -25,7 +25,7 @@ export interface Employee {
   id: string;
   nombre: string;
   correo: string;
-  proyectosAsignados: string[];
+  proyectosAsignados: string[]
 }
 
 export type EmployeeId = Employee['id'];

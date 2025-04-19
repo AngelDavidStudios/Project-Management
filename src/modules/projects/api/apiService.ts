@@ -3,10 +3,6 @@ import type { Employee, EmployeeId, Project, ProjectId, Task } from '@/types'
 
 const apiService = axios.create({
   baseURL: import.meta.env.VITE_API_PROJECT_URL,
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  }
 })
 
 // Consume API Empleados
@@ -16,6 +12,16 @@ export const fetchAllEmployees = async (): Promise<Employee[]> => {
     return response.data
   } catch (error) {
     console.error('Error fetching projects:', error)
+    throw error
+  }
+}
+
+export const fetchEmployeeById = async (id: EmployeeId): Promise<Employee> => {
+  try {
+    const response = await apiService.get(`/Empleado/${id}`)
+    return response.data
+  } catch (error) {
+    console.error('Error fetching employee:', error)
     throw error
   }
 }

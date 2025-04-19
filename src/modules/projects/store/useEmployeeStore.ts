@@ -1,7 +1,13 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type { Employee, EmployeeId } from '@/types'
-import { createEmployee, fetchAllEmployees, updateEmployee, deleteEmployee } from '@/modules/projects/api/apiService.ts'
+import {
+  createEmployee,
+  fetchAllEmployees,
+  updateEmployee,
+  deleteEmployee,
+  fetchEmployeeById
+} from '@/modules/projects/api/apiService.ts'
 
 
 export const useEmployeeStore = defineStore('employee', () => {
@@ -9,6 +15,9 @@ export const useEmployeeStore = defineStore('employee', () => {
   const isLoading = ref(false)
   const error = ref<string | null>(null)
   const currentEmployee = ref<Employee | null>(null)
+
+  const showDeleteModal = ref(false);
+  const employeeToDelete = ref<string | null>(null);
 
   // Get all employees
   const fetchEmployees = async () => {
@@ -18,6 +27,21 @@ export const useEmployeeStore = defineStore('employee', () => {
       employees.value = await fetchAllEmployees()
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Error al cargar empleados'
+      console.error(error.value)
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  // Get employee by ID
+  const fetchEmployeeByIdAsync = async (id: EmployeeId) => {
+    isLoading.value = true
+    error.value = null
+    try {
+      currentEmployee.value = await fetchEmployeeById(id)
+      return currentEmployee.value
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Error al cargar el empleado'
       console.error(error.value)
     } finally {
       isLoading.value = false
@@ -77,6 +101,16 @@ export const useEmployeeStore = defineStore('employee', () => {
     }
   }
 
+  const confirmDelete = (id: string) => {
+    employeeToDelete.value = id;
+    showDeleteModal.value = true;
+  };
+
+  const cancelDelete = () => {
+    employeeToDelete.value = null;
+    showDeleteModal.value = false;
+  };
+
   // Computed properties
   const getEmployeeById = computed(() => {
     return (id: string) => employees.value.find(emp => emp.id === id);
@@ -92,10 +126,15 @@ export const useEmployeeStore = defineStore('employee', () => {
     isLoading,
     error,
     currentEmployee,
+    showDeleteModal,
+    employeeToDelete,
     fetchEmployees,
+    fetchEmployeeByIdAsync,
     addEmployeeAsync,
     updateEmployeeAsync,
     deleteEmployeeAsync,
+    confirmDelete,
+    cancelDelete,
     getEmployeeById,
     getEmployeesByProject
   }

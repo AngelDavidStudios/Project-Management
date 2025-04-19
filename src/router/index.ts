@@ -60,14 +60,16 @@ const router = createRouter({
           component: ProjectForm
         },
         {
-          path:  ':id',
+          path: ':id',
           name: 'ProjectEdit',
           component: ProjectForm,
+          props: true
         },
         {
           path: ':id/tasks',
           name: 'ProjectTasks',
-          component: ProjectTasks
+          component: ProjectTasks,
+          props: true
         }
       ]
     }

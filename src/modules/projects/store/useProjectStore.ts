@@ -1,7 +1,13 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type { DateRange, Project, ProjectId, Task, TaskId } from '@/types'
-import { createProject, deleteProject, fetchAllProjects, updateProject } from '@/modules/projects/api/apiService.ts'
+import {
+  createProject,
+  deleteProject,
+  fetchAllProjects,
+  fetchProjectById,
+  updateProject
+} from '@/modules/projects/api/apiService.ts'
 import { calculateDelay, isPastDate } from '@/types/date.ts'
 
 
@@ -11,6 +17,9 @@ export const useProjectStore = defineStore('projectStore', () => {
   const error = ref<string | null>(null)
   const currentProject = ref<Project | null>(null)
   const dateFilter = ref<DateRange | null>(null)
+
+  const showDeleteModal = ref(false);
+  const projectToDelete = ref<string | null>(null);
 
   // Projects CRUD operations
 
@@ -22,6 +31,21 @@ export const useProjectStore = defineStore('projectStore', () => {
       projects.value = await fetchAllProjects()
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Error loading projects'
+      console.error(error.value)
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  // Get a project by ID
+  const fetchProjectByIdAsync = async (id: ProjectId) => {
+    isLoading.value = true
+    error.value = null
+    try {
+      currentProject.value = await fetchProjectById(id)
+      return currentProject.value
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Error loading project'
       console.error(error.value)
     } finally {
       isLoading.value = false
@@ -82,6 +106,16 @@ export const useProjectStore = defineStore('projectStore', () => {
     } finally {
       isLoading.value = false
     }
+  }
+
+  const confirmDelete = (id: string) => {
+    projectToDelete.value = id;
+    showDeleteModal.value = true;
+  }
+
+  const cancelDelete = () => {
+    projectToDelete.value = null;
+    showDeleteModal.value = false;
   }
 
   // Tasks CRUD operations
@@ -273,6 +307,8 @@ export const useProjectStore = defineStore('projectStore', () => {
     error,
     currentProject,
     dateFilter,
+    showDeleteModal,
+    projectToDelete,
 
     // Getters
     filteredProjects,
@@ -283,6 +319,7 @@ export const useProjectStore = defineStore('projectStore', () => {
 
     // Actions
     fetchProjects,
+    fetchProjectByIdAsync,
     addProjectAsync,
     updateProjecyAsync,
     deleteProjectAsync,
@@ -290,6 +327,8 @@ export const useProjectStore = defineStore('projectStore', () => {
     addTaskAsync,
     updateTaskAsync,
     deleteTaskAsync,
-    setDateFilter
+    setDateFilter,
+    confirmDelete,
+    cancelDelete,
   }
 })

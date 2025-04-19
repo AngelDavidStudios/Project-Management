@@ -66,6 +66,16 @@ export const fetchAllProjects = async (): Promise<Project[]> => {
   }
 }
 
+export const fetchProjectById = async (id: ProjectId): Promise<Project> => {
+  try {
+    const response = await apiService.get(`/Project/${id}`)
+    return response.data
+  } catch (error) {
+    console.error('Error fetching project:', error)
+    throw error
+  }
+}
+
 export const createProject = async (project: Project): Promise<Project> => {
   try {
     const response = await apiService.post('/Project', project)

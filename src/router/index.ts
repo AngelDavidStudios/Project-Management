@@ -1,8 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Dashboard from '@/modules/projects/views/Dashboard.vue'
-import EmployeeLayout from '@/modules/projects/layouts/EmployeeLayout.vue'
-import EmployeeForm from '@/modules/projects/views/employee/EmployeeForm.vue'
-import EmployeeList from '@/modules/projects/views/employee/EmployeeList.vue'
+import {
+  Dashboard,
+  EmployeeForm,
+  ProjectForm,
+  EmployeeList,
+  ProjectTasks,
+  EmployeeLayout,
+  ProjectLayout,
+  ProjectList,
+} from '@/modules'
 
 
 const router = createRouter({
@@ -34,6 +40,34 @@ const router = createRouter({
           name: 'EmployeeEdit',
           component: EmployeeForm,
           props: true
+        }
+      ]
+    },
+    {
+      path: '/projects',
+      name: 'ProjectLayout',
+      redirect: {name: 'ProjectList'},
+      component: ProjectLayout,
+      children: [
+        {
+          path: '',
+          name: 'ProjectList',
+          component: ProjectList
+        },
+        {
+          path: 'new',
+          name: 'ProjectNew',
+          component: ProjectForm
+        },
+        {
+          path:  ':id',
+          name: 'ProjectEdit',
+          component: ProjectForm,
+        },
+        {
+          path: ':id/tasks',
+          name: 'ProjectTasks',
+          component: ProjectTasks
         }
       ]
     }

@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Employee, EmployeeId, Project, ProjectId } from '@/types'
+import type { Employee, EmployeeId, Project, ProjectId, Task } from '@/types'
 
 const apiService = axios.create({
   baseURL: import.meta.env.VITE_API_PROJECT_URL,
@@ -85,6 +85,46 @@ export const deleteProject = async (id: ProjectId): Promise<void> => {
     await apiService.delete(`/Project/${id}`)
   } catch (error) {
     console.error('Error deleting project:', error)
+    throw error
+  }
+}
+
+// Consume API Tasks into Project
+export const fetchAllTasks = async (projectId: ProjectId): Promise<Project['tareas']> => {
+  try {
+    const response = await apiService.get(`/Project/${projectId}/tasks`)
+    return response.data
+  } catch (error) {
+    console.error('Error fetching tasks:', error)
+    throw error
+  }
+}
+
+export const createTask = async (projectId: ProjectId, task: Task): Promise<Task> => {
+  try {
+    const response = await apiService.post(`/Project/${projectId}/tasks`, task)
+    return response.data
+  } catch (error) {
+    console.error('Error creating task:', error)
+    throw error
+  }
+}
+
+export const updateTask = async (projectId: ProjectId, taskId: string, task: Partial<Task>): Promise<Task> => {
+  try {
+    const response = await apiService.put(`/Project/${projectId}/tasks/${taskId}`, task)
+    return response.data
+  } catch (error) {
+    console.error('Error updating task:', error)
+    throw error
+  }
+}
+
+export const deleteTask = async (projectId: ProjectId, taskId: string): Promise<void> => {
+  try {
+    await apiService.delete(`/Project/${projectId}/tasks/${taskId}`)
+  } catch (error) {
+    console.error('Error deleting task:', error)
     throw error
   }
 }

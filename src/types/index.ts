@@ -7,6 +7,8 @@ export interface Task {
   estado: number; // 0: Pendiente, 1: En progreso, 2: Completada, 3: Retrasada
 }
 
+export type TaskId = Task['id'];
+
 export interface Project {
   id: string;
   nombre: string;

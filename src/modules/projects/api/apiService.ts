@@ -116,7 +116,7 @@ export const fetchAllTasks = async (projectId: ProjectId): Promise<Project['tare
   }
 }
 
-export const createTask = async (projectId: ProjectId, task: Omit<Task, 'id'>): Promise<Task> => {
+export const createTask = async (projectId: ProjectId, task: Task): Promise<Task> => {
   try {
     const response = await apiService.post(`/Project/${projectId}/tasks`, task);
     return response.data;

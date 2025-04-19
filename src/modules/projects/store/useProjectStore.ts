@@ -143,7 +143,7 @@ export const useProjectStore = defineStore('projectStore', () => {
   };
 
   // Add a new task to a project
-const addTaskAsync = async (projectId: ProjectId, task: Omit<Task, 'id'>) => {
+const addTaskAsync = async (projectId: ProjectId, task: Task) => {
   isLoading.value = true;
   error.value = null;
     try {

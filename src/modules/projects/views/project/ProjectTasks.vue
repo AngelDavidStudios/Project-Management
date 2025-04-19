@@ -48,6 +48,7 @@ const sortedTasks = computed(() => {
 const openNewTaskModal = () => {
   isEditingTask.value = false;
   taskForm.value = {
+    id: '',
     titulo: '',
     descripcion: '',
     fechaAsignada: new Date().toISOString().split('T')[0],
@@ -82,7 +83,7 @@ const saveTask = async () => {
     if (isEditingTask.value && taskForm.value.id) {
       await projectStore.updateTaskAsync(projectId, taskForm.value.id, taskForm.value)
     } else {
-      await projectStore.addTaskAsync(projectId, toRaw(taskForm.value) as Omit<Task, 'id'>)
+      await projectStore.addTaskAsync(projectId, taskForm.value as Task)
     }
     closeTaskModal();
     await projectStore.fetchProjectByIdAsync(projectId);

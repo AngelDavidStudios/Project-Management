@@ -4,6 +4,8 @@ import { useRouter } from 'vue-router'
 import { computed } from 'vue'
 import { useProjectStore } from '@/modules/projects/store/useProjectStore.ts'
 import { formatDate } from '../../../types/date.ts'
+import StatusBadge from '@/modules/common/components/StatusBadge.vue'
+import DelayIndicator from '@/modules/common/components/DelayIndicator.vue'
 
 const router = useRouter();
 const projectStore = useProjectStore();

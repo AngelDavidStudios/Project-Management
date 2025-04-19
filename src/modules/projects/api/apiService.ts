@@ -116,15 +116,15 @@ export const fetchAllTasks = async (projectId: ProjectId): Promise<Project['tare
   }
 }
 
-export const createTask = async (projectId: ProjectId, task: Task): Promise<Task> => {
+export const createTask = async (projectId: ProjectId, task: Omit<Task, 'id'>): Promise<Task> => {
   try {
-    const response = await apiService.post(`/Project/${projectId}/tasks`, task)
-    return response.data
+    const response = await apiService.post(`/Project/${projectId}/tasks`, task);
+    return response.data;
   } catch (error) {
-    console.error('Error creating task:', error)
-    throw error
+    console.error('Error creating task:', error);
+    throw error;
   }
-}
+};
 
 export const updateTask = async (projectId: ProjectId, taskId: string, task: Partial<Task>): Promise<Task> => {
   try {

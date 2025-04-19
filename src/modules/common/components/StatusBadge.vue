@@ -16,6 +16,7 @@ const statusLabel = {
   0: 'Pendiente',
   1: 'En Progreso',
   2: 'Completada',
+  3: 'Cancelada',
 };
 
 </script>

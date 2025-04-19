@@ -1,59 +1,46 @@
 <script setup lang="ts">
 
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useProjectStore } from '@/modules/projects/store/useProjectStore.ts'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, toRaw } from 'vue'
 import type { Task } from '@/types'
 import { calculateDelay, formatDate } from '../../../../types/date.ts'
 import StatusBadge from '@/modules/common/components/StatusBadge.vue'
 import DelayIndicator from '@/modules/common/components/DelayIndicator.vue'
 
-const router = useRouter();
 const route = useRoute();
 const projectStore = useProjectStore();
 
+defineProps<{
+  id: string;
+}>()
+
+const projectId = route.params.id as string;
+const taskForm = ref<Partial<Task>>({})
 const isLoading = ref(true);
 const error = ref<string | null>(null);
 const showTaskModal = ref(false);
 const showDeleteModal = ref(false);
 const taskToDelete = ref<string | null>(null);
-
-const taskForm = ref<Partial<Task>>({
-  id: '',
-  titulo: '',
-  descripcion: '',
-  fechaAsignada: '',
-  fechaLimite: '',
-  estado: 0,
-})
-
 const isEditingTask = ref(false);
+const project = computed(() => projectStore.getProjectById(projectId))
 
 onMounted(async () => {
-  if (route.params.id) {
+  if (projectId) {
     try {
-      await projectStore.fetchProjectByIdAsync(route.params.id as string);
-      if (!projectStore.currentProject) {
-        error.value = 'No se encontró el proyecto';
-        router.push({ name: 'ProjectList' });
-      }
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Error al cargar el proyecto';
-      console.error(error.value);
-    } finally {
+      await projectStore.fetchProjectByIdAsync(projectId);
+      await projectStore.fetchAllTasksAsync(projectId);
       isLoading.value = false;
+    } catch (err) {
+      console.error('Error loading project or tasks:', err);
     }
   }
 });
 
-const project = computed(() => projectStore.currentProject);
-
 const sortedTasks = computed(() => {
   if (!project.value) return [];
   return [...project.value.tareas].sort((a, b) => {
-    // Sort by status first (pending -> in progress -> completed)
     if (a.estado !== b.estado) return a.estado - b.estado;
-    // Then by due date
     return new Date(a.fechaLimite).getTime() - new Date(b.fechaLimite).getTime();
   });
 });
@@ -77,15 +64,9 @@ const openEditTaskModal = (task: Task) => {
 };
 
 const closeTaskModal = () => {
-  showTaskModal.value = false;
-  taskForm.value = {
-    titulo: '',
-    descripcion: '',
-    fechaAsignada: new Date().toISOString().split('T')[0],
-    fechaLimite: '',
-    estado: 0
-  };
-};
+  showTaskModal.value = false
+  taskForm.value = {}
+}
 
 const saveTask = async () => {
   if (!project.value) return;
@@ -96,19 +77,16 @@ const saveTask = async () => {
   }
 
   try {
+    taskForm.value.estado = Number(taskForm.value.estado);
+    console.log('Task Form Data:', taskForm.value);
     if (isEditingTask.value && taskForm.value.id) {
-      await projectStore.updateTaskAsync(
-        project.value.id,
-        taskForm.value.id,
-        taskForm.value
-      );
+      await projectStore.updateTaskAsync(projectId, taskForm.value.id, taskForm.value)
     } else {
-      await projectStore.addTaskAsync(
-        project.value.id,
-        taskForm.value as Omit<Task, 'id'>
-      );
+      await projectStore.addTaskAsync(projectId, toRaw(taskForm.value) as Omit<Task, 'id'>)
     }
     closeTaskModal();
+    await projectStore.fetchProjectByIdAsync(projectId);
+    await projectStore.fetchAllTasksAsync(projectId);
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Error al guardar la tarea';
     console.error(error.value);
@@ -145,7 +123,7 @@ const updateTaskStatus = async (task: Task, newStatus: number) => {
   try {
     await projectStore.updateTaskAsync(project.value.id, task.id, {
       ...task,
-      estado: newStatus
+      estado: Number(newStatus)
     });
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Error al actualizar el estado de la tarea';
@@ -212,7 +190,7 @@ const updateTaskStatus = async (task: Task, newStatus: number) => {
                 <div class="flex-1">
                   <div class="flex items-center">
                     <h3 class="text-lg font-medium text-gray-900">{{ task.titulo }}</h3>
-                    <StatusBadge :status="task.estado" class="ml-3" />
+                    <StatusBadge :status="task.estado ?? 0" class="ml-3" />
                   </div>
                   <p class="mt-1 text-sm text-gray-500">{{ task.descripcion }}</p>
                   <div class="mt-2 flex flex-wrap gap-4 text-sm text-gray-500">
@@ -235,12 +213,13 @@ const updateTaskStatus = async (task: Task, newStatus: number) => {
                 </div>
                 <div class="ml-4 flex-shrink-0 flex items-center space-x-2">
                   <select
-                    v-model="task.estado"
+                    v-model.number="task.estado"
                     @change="updateTaskStatus(task, parseInt(($event.target as HTMLSelectElement).value))"
                     class="block rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm h-9 border">
-                    <option value="0">Pendiente</option>
-                    <option value="1">En Progreso</option>
-                    <option value="2">Completada</option>
+                    <option :value="0">Pendiente</option>
+                    <option :value="1">En Progreso</option>
+                    <option :value="2">Completada</option>
+                    <option :value="3">Cancelada</option>
                   </select>
                   <button
                     @click="openEditTaskModal(task)"

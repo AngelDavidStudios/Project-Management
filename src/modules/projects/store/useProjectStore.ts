@@ -2,11 +2,11 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type { DateRange, Project, ProjectId, Task, TaskId } from '@/types'
 import {
-  createProject,
-  deleteProject,
-  fetchAllProjects,
+  createProject, createTask,
+  deleteProject, deleteTask,
+  fetchAllProjects, fetchAllTasks,
   fetchProjectById,
-  updateProject
+  updateProject, updateTask
 } from '@/modules/projects/api/apiService.ts'
 import { calculateDelay, isPastDate } from '@/types/date.ts'
 
@@ -121,92 +121,89 @@ export const useProjectStore = defineStore('projectStore', () => {
   // Tasks CRUD operations
 
   // Fetch all tasks for a project
-  const fetchAllTasks = async (projectId: ProjectId) => {
-    isLoading.value = true
-    error.value = null
+  const fetchAllTasksAsync = async (projectId: ProjectId) => {
+    isLoading.value = true;
+    error.value = null;
     try {
-      const project = projects.value.find((p) => p.id === projectId)
+      const tasks = await fetchAllTasks(projectId);
+      const project = projects.value.find((p) => p.id === projectId);
       if (project) {
-        return project.tareas
-      } else {
-        throw new Error('Project not found')
+        project.tareas = tasks;
+        if (currentProject.value?.id === projectId) {
+          currentProject.value.tareas = tasks; // Asegúrate de actualizar `currentProject`
+        }
       }
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Error loading tasks'
-      console.error(error.value)
-      throw err
+      error.value = err instanceof Error ? err.message : 'Error fetching tasks';
+      console.error(error.value);
+      throw err;
     } finally {
-      isLoading.value = false
+      isLoading.value = false;
     }
-  }
+  };
 
   // Add a new task to a project
-  const addTaskAsync = async (projectId: ProjectId, task: Omit<Project['tareas'][0], 'id'>) => {
-    isLoading.value = true
-    error.value = null
+const addTaskAsync = async (projectId: ProjectId, task: Omit<Task, 'id'>) => {
+  isLoading.value = true;
+  error.value = null;
     try {
-      const project = projects.value.find((p) => p.id === projectId)
+      const newTask = await createTask(projectId, task);
+      const project = projects.value.find((p) => p.id === projectId);
       if (project) {
-        const newTask = { ...task, id: crypto.randomUUID() }
-        project.tareas.push(newTask)
-        return newTask
-      } else {
-        throw new Error('Project not found')
+        project.tareas.push(newTask);
       }
+      return newTask;
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Error loading tasks'
-      console.error(error.value)
-      throw err
+      error.value = err instanceof Error ? err.message : 'Error creating task';
+      console.error(error.value);
+      throw err;
     } finally {
-      isLoading.value = false
+      isLoading.value = false;
     }
-  }
+};
 
   // Update an existing task
-  const updateTaskAsync = async (projectId: ProjectId, taskId: TaskId, task: Partial<Project['tareas'][0]>) => {
-    isLoading.value = true
-    error.value = null
+  const updateTaskAsync = async (projectId: ProjectId, taskId: TaskId, task: Partial<Task>) => {
+    isLoading.value = true;
+    error.value = null;
     try {
-      const project = projects.value.find((p) => p.id === projectId)
+      const updatedTask = await updateTask(projectId, taskId, task);
+      const project = projects.value.find((p) => p.id === projectId);
       if (project) {
-        const taskIndex = project.tareas.findIndex((t) => t.id === taskId)
+        const taskIndex = project.tareas.findIndex((t) => t.id === taskId);
         if (taskIndex !== -1) {
-          project.tareas[taskIndex] = { ...project.tareas[taskIndex], ...task }
-          return project.tareas[taskIndex]
-        } else {
-          throw new Error('Task not found')
+          project.tareas[taskIndex] = { ...project.tareas[taskIndex], ...updatedTask };
+          project.tareas = [...project.tareas]; // Forzar reactividad
         }
-      } else {
-        throw new Error('Project not found')
       }
+      return updatedTask;
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Error loading tasks'
-      console.error(error.value)
-      throw err
+      error.value = err instanceof Error ? err.message : 'Error updating task';
+      console.error(error.value);
+      throw err;
     } finally {
-      isLoading.value = false
+      isLoading.value = false;
     }
-  }
+  };
 
   // Delete a task
   const deleteTaskAsync = async (projectId: ProjectId, taskId: TaskId) => {
-    isLoading.value = true
-    error.value = null
+    isLoading.value = true;
+    error.value = null;
     try {
-      const project = projects.value.find((p) => p.id === projectId)
+      await deleteTask(projectId, taskId);
+      const project = projects.value.find((p) => p.id === projectId);
       if (project) {
-        project.tareas = project.tareas.filter((t) => t.id !== taskId)
-      } else {
-        throw new Error('Project not found')
+        project.tareas = project.tareas.filter((t) => t.id !== taskId);
       }
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Error loading tasks'
-      console.error(error.value)
-      throw err
+      error.value = err instanceof Error ? err.message : 'Error deleting task';
+      console.error(error.value);
+      throw err;
     } finally {
-      isLoading.value = false
+      isLoading.value = false;
     }
-  }
+  };
 
   // Date filtering
   const setDateFilter = (range: DateRange | null) => {
@@ -323,7 +320,7 @@ export const useProjectStore = defineStore('projectStore', () => {
     addProjectAsync,
     updateProjecyAsync,
     deleteProjectAsync,
-    fetchAllTasks,
+    fetchAllTasksAsync,
     addTaskAsync,
     updateTaskAsync,
     deleteTaskAsync,

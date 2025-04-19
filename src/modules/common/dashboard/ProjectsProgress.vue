@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router'
 import { computed } from 'vue'
 import { formatDate } from '../../../types/date.ts'
+import { useProjectStore } from '@/modules/projects/store/useProjectStore.ts'
 
 const router = useRouter();
 const projectStore = useProjectStore();

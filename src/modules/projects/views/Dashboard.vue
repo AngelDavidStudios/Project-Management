@@ -95,7 +95,7 @@ const formatPercentage = (value: number): string => {
                 title="Total Empleados"
                 :value="employeeStore.employees.length"
                 :icon="icons.employees"
-                color="bg-Sky-500"
+                color="bg-sky-500"
               />
               <StatCard
                 title="Tareas Completadas"

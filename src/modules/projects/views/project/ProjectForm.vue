@@ -15,6 +15,11 @@ const isLoading = ref(true);
 const isSaving = ref(false);
 const error = ref<string | null>(null);
 
+defineProps<{
+  id: string;
+}>()
+
+
 const formData = ref<Partial<Project>>({
   id: '',
   nombre: '',

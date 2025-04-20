@@ -246,7 +246,7 @@ const addTaskAsync = async (projectId: ProjectId, task: Task) => {
 
     projects.value.forEach(project => {
       project.tareas.forEach(task => {
-        if (task.estado !== 2 && isPastDate(task.fechaLimite)) { // Not completed and past deadline
+        if (task.estado === 3 && isPastDate(task.fechaLimite)) { // Not completed and past deadline
           const delay = calculateDelay(task.fechaLimite);
           if (delay > 0) {
             result.push({

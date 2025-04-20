@@ -2,9 +2,9 @@
 
 import { useRoute } from 'vue-router'
 import { useProjectStore } from '@/modules/projects/store/useProjectStore.ts'
-import { computed, onMounted, ref, toRaw } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import type { Task } from '@/types'
-import { calculateDelay, formatDate } from '../../../../types/date.ts'
+import { calculateDelay, formatDate } from '@/types/date.ts'
 import StatusBadge from '@/modules/common/components/StatusBadge.vue'
 import DelayIndicator from '@/modules/common/components/DelayIndicator.vue'
 
@@ -79,7 +79,6 @@ const saveTask = async () => {
 
   try {
     taskForm.value.estado = Number(taskForm.value.estado);
-    console.log('Task Form Data:', taskForm.value);
     if (isEditingTask.value && taskForm.value.id) {
       await projectStore.updateTaskAsync(projectId, taskForm.value.id, taskForm.value)
     } else {
@@ -220,7 +219,7 @@ const updateTaskStatus = async (task: Task, newStatus: number) => {
                     <option :value="0">Pendiente</option>
                     <option :value="1">En Progreso</option>
                     <option :value="2">Completada</option>
-                    <option :value="3">Cancelada</option>
+                    <option :value="3">Retrasada</option>
                   </select>
                   <button
                     @click="openEditTaskModal(task)"
@@ -309,7 +308,7 @@ const updateTaskStatus = async (task: Task, newStatus: number) => {
                 <option value="0">Pendiente</option>
                 <option value="1">En Progreso</option>
                 <option value="2">Completada</option>
-                <option value="3">Cancelada</option>
+                <option value="3">Retrasada</option>
               </select>
             </div>
           </form>

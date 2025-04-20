@@ -4,13 +4,18 @@ import { useProjectStore } from '@/modules/projects/store/useProjectStore.ts'
 import { useRouter } from 'vue-router'
 import { onMounted, ref } from 'vue'
 import type { DateRange } from '@/types'
-import { formatDate } from '../../../../types/date.ts'
+import { formatDate } from '@/types/date.ts'
 import DateRangePicker from '@/modules/common/components/DateRangePicker.vue'
 
 const projectStore = useProjectStore();
 const router = useRouter();
 const isLoading = ref(true);
 const dateRange = ref<DateRange | null>(null);
+
+defineProps<{
+  id?: string;
+}>()
+
 
 onMounted(async () => {
   try {

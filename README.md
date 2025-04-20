@@ -51,7 +51,7 @@
 ## Repositorios en GitHub
 > - [Backend .NET y AWS Lambda](https://github.com/AngelDavidStudios/MiniCoreBackend)
 > 
-> - [FrontEnd con VueJs y TypeScript]()
+> - [FrontEnd con VueJs y TypeScript](https://github.com/AngelDavidStudios/Project-Management)
 
 
 
